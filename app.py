@@ -110,8 +110,18 @@ if prompt := st.chat_input("কী জানতে চান? লিখুন...
           stream=True,
       )
 
-      # রিয়েল-টাইমে লেখা টাইপ হতে থাকবে (ChatGPT/Gemini Style)
-      response = st.write_stream(stream)
+      # JSON ডাটা থেকে মূল টেক্সট এক্সট্র্যাক্ট করার জেনারেটর
+      def generate_response():
+        for chunk in stream:
+          if (
+              chunk.choices
+              and len(chunk.choices) > 0
+              and chunk.choices[0].delta.content is not None
+          ):
+            yield chunk.choices[0].delta.content
+
+      # সুন্দরভাবে শুধু টেক্সট টাইপ করার জন্য
+      response = st.write_stream(generate_response)
 
       # AI এর রেসপন্স হিস্ট্রিতে সেভ করা
       st.session_state.messages.append(
